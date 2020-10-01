@@ -1,4 +1,4 @@
-package ja.server.utils;
+package ru.kogotag.ja.utils;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -43,7 +43,9 @@ public class ServerInfoResponse {
             return clearName;
         }
 
-        public int getId() { return id; }
+        public int getId() {
+            return id;
+        }
     }
 
     public Map<String, String> getServerConfig() {
@@ -56,6 +58,10 @@ public class ServerInfoResponse {
 
     public ServerInfoResponse(InetAddress host, int port) {
         parseResponse(host, port);
+    }
+
+    public String jaUncolorString(String stringToUncolor) {
+        return stringToUncolor.replaceAll("\\^[0-8]", "");
     }
 
     private String getResponse(InetAddress host, int port) {
