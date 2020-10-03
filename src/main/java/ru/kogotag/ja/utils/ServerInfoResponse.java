@@ -1,52 +1,11 @@
 package ru.kogotag.ja.utils;
 
-import org.apache.commons.lang3.ArrayUtils;
-
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ServerInfoResponse {
     private Map<String, String> serverConfig;
     private List<ServerInfoResponsePlayer> players;
-
-    public class ServerInfoResponsePlayer {
-        private int score;
-        private int id;
-        private int ping;
-        private String name;
-        private String clearName;
-
-        public ServerInfoResponsePlayer(int score, int id, int ping, String name, String clearName) {
-            this.score = score;
-            this.ping = ping;
-            this.name = name;
-            this.clearName = clearName;
-            this.id = id;
-        }
-
-        public int getScore() {
-            return score;
-        }
-
-        public int getPing() {
-            return ping;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getClearName() {
-            return clearName;
-        }
-
-        public int getId() {
-            return id;
-        }
-    }
 
     public Map<String, String> getServerConfig() {
         return serverConfig;
@@ -56,38 +15,11 @@ public class ServerInfoResponse {
         return players;
     }
 
-    public ServerInfoResponse(InetAddress host, int port) {
-        parseResponse(host, port);
+    public ServerInfoResponse(String response) {
+        parseResponse(response);
     }
 
-    public String jaUncolorString(String stringToUncolor) {
-        return stringToUncolor.replaceAll("\\^[0-8]", "");
-    }
-
-    private String getResponse(InetAddress host, int port) {
-        try {
-            String msg = "getstatus";
-            byte[] prefix = new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF};
-            byte[] msgDecoded = msg.getBytes();
-            byte[] buf = ArrayUtils.addAll(prefix, msgDecoded);
-            DatagramSocket socket = new DatagramSocket();
-            DatagramPacket packet = new DatagramPacket(buf, buf.length, host, port);
-            socket.send(packet);
-            buf = new byte[4096];
-            packet = new DatagramPacket(buf, buf.length);
-            socket.receive(packet);
-            String received = new String(
-                    packet.getData(), 0, packet.getLength());
-            socket.close();
-            return received;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    private void parseResponse(InetAddress host, int port) {
-        String response = getResponse(host, port);
+    public void parseResponse(String response) {
         if (response == null || response.length() <= 0) return;
         String[] data = response.split("\n");
         if (data == null || data.length < 2) return;
@@ -108,5 +40,25 @@ public class ServerInfoResponse {
         }
         players = pls;
         serverConfig = config;
+    }
+
+    public List<String> getPlayersClearNames(){
+        if(players == null || players.size()<=0) return null;
+        List<String> names = new ArrayList<>();
+        for (ServerInfoResponsePlayer player :
+                players) {
+            names.add(player.getClearName());
+        }
+        return names;
+    }
+
+    public List<String> getPlayersNames(){
+        if(players == null || players.size()<=0) return null;
+        List<String> names = new ArrayList<>();
+        for (ServerInfoResponsePlayer player :
+                players) {
+            names.add(player.getName());
+        }
+        return names;
     }
 }
